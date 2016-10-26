@@ -31,6 +31,10 @@ class CallbackController(faststreamClient: FaststreamClient) extends FrontendCon
       val status = (contentAsJson \ "status").asOpt[String]
 
       Try(status match {
+        case Some("view_branded_video") =>
+          Logger.debug("view_branded_video callback received!")
+          val parsed = contentAsJson.as[ViewBrandedVideoCallback]
+          faststreamClient.viewBrandedVideoCallback(ViewBrandedVideoCallbackRequest.fromExchange(parsed)).map(_ => Ok("Received"))
         case Some("setup_process") =>
           Logger.debug("setup_process callback received!")
           val parsed = contentAsJson.as[SetupProcessCallback]

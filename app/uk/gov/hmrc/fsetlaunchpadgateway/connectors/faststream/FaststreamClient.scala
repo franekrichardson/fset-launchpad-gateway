@@ -20,6 +20,11 @@ trait FaststreamClient {
 
   import uk.gov.hmrc.fsetlaunchpadgateway.config.FrontendAppConfig.faststreamApiConfig._
 
+  def viewBrandedVideoCallback(callback: ViewBrandedVideoCallbackRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
+    val launchPadPrefix = getLaunchpadPrefix(callback.customInviteId)
+    http.PUT(s"${url.host}${url.base}$launchPadPrefix/viewBrandedVideoCallback", callback).map(okOrThrow)
+  }
+
   def setupProcessCallback(callback: SetupProcessCallbackRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
     val launchPadPrefix = getLaunchpadPrefix(callback.customInviteId)
     http.PUT(s"${url.host}${url.base}$launchPadPrefix/setupProcessCallback", callback).map(okOrThrow)
