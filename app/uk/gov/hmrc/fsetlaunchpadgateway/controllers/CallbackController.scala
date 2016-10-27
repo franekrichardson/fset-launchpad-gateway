@@ -80,7 +80,6 @@ class CallbackController(faststreamClient: FaststreamClient) extends FrontendCon
       Future.successful(BadRequest("Callback body was empty"))
     }
   }
-
   // scalastyle:on
 }
 
