@@ -8,5 +8,8 @@ case class SetupProcessCallback(candidate_id: String, custom_candidate_id: Strin
   extends BaseCallback(candidate_id, custom_candidate_id, interview_id, custom_interview_id, custom_invite_id, status, deadline)
 
 object SetupProcessCallback {
+
+  val expectedStatusKey = "setup_process"
+
   implicit val setupProcessCallbackFormat = Json.format[SetupProcessCallback]
 }

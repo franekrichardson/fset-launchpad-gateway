@@ -28,38 +28,42 @@ class CallbackController(faststreamClient: FaststreamClient) extends FrontendCon
     request.body.asJson.map { contentAsJson =>
       Logger.debug(s"Callback received with body: $contentAsJson")
 
-      val status = (contentAsJson \ "status").asOpt[String]
+      val statusOpt = (contentAsJson \ "status").asOpt[String]
 
-      Try(status match {
-        case Some("view_branded_video") =>
-          Logger.debug("view_branded_video callback received!")
-          val parsed = contentAsJson.as[ViewBrandedVideoCallback]
-          faststreamClient.viewBrandedVideoCallback(ViewBrandedVideoCallbackRequest.fromExchange(parsed)).map(_ => Ok("Received"))
-        case Some("setup_process") =>
-          Logger.debug("setup_process callback received!")
-          val parsed = contentAsJson.as[SetupProcessCallback]
-          faststreamClient.setupProcessCallback(SetupProcessCallbackRequest.fromExchange(parsed)).map(_ => Ok("Received"))
-        case Some("view_practice_question") =>
-          Logger.debug("view_practice_question callback received!")
-          val parsed = contentAsJson.as[ViewPracticeQuestionCallback]
-          faststreamClient.viewPracticeQuestionCallback(ViewPracticeQuestionCallbackRequest.fromExchange(parsed)).map(_ => Ok("Received"))
-        case Some("question") =>
-          Logger.debug("question callback received!")
-          val parsed = contentAsJson.as[QuestionCallback]
-          Logger.debug("Question parsed => " + parsed)
-          faststreamClient.questionCallback(QuestionCallbackRequest.fromExchange(parsed)).map(_ => Ok("Received"))
-        case Some("final") =>
-          val parsed = contentAsJson.as[FinalCallback]
-          Logger.debug("final callback received!")
-          faststreamClient.finalCallback(FinalCallbackRequest.fromExchange(parsed)).map(_ => Ok("Received"))
-        case Some("finished") =>
-          val parsed = contentAsJson.as[FinishedCallback]
-          Logger.debug("finished callback received!")
-          faststreamClient.finishedCallback(FinishedCallbackRequest.fromExchange(parsed)).map(_ => Ok("Received"))
-        case _ =>
-          Logger.warn(s"Unknown callback type received! Status was $status, JSON body was $contentAsJson")
+      Try {
+        statusOpt.map { status =>
+          Logger.debug(s"Callback with status '$status' received")
+          status match {
+            case "view_branded_video" =>
+              val parsed = contentAsJson.as[ViewBrandedVideoCallback]
+              faststreamClient.viewBrandedVideoCallback(ViewBrandedVideoCallbackRequest.fromExchange(parsed))
+            case "setup_process" =>
+              val parsed = contentAsJson.as[SetupProcessCallback]
+              faststreamClient.setupProcessCallback(SetupProcessCallbackRequest.fromExchange(parsed))
+            case "view_practice_question" =>
+              val parsed = contentAsJson.as[ViewPracticeQuestionCallback]
+              faststreamClient.viewPracticeQuestionCallback(ViewPracticeQuestionCallbackRequest.fromExchange(parsed))
+            case "question" =>
+              val parsed = contentAsJson.as[QuestionCallback]
+              faststreamClient.questionCallback(QuestionCallbackRequest.fromExchange(parsed))
+            case "final" =>
+              val parsed = contentAsJson.as[FinalCallback]
+              faststreamClient.finalCallback(FinalCallbackRequest.fromExchange(parsed))
+            case "finished" =>
+              val parsed = contentAsJson.as[FinishedCallback]
+              faststreamClient.finishedCallback(FinishedCallbackRequest.fromExchange(parsed))
+            // TODO
+            case "reviewed" =>
+              val parsed = contentAsJson.as[FinishedCallback]
+              faststreamClient.finishedCallback(FinishedCallbackRequest.fromExchange(parsed))
+          }
+        }.map { _ =>
+          Future.successful(Ok("Received"))
+        }.getOrElse {
+          Logger.warn(s"Unknown callback type received! Status was $statusOpt, JSON body was $contentAsJson")
           Future.successful(BadRequest("Status was not recognised"))
-      }) match {
+        }
+      } match {
         case Success(result) => result
         case Failure(ex) if ex.isInstanceOf[JsResultException] =>
           Logger.warn(s"Could not parse payload with valid status. Raw request: ${request.body}. Exception: $ex")
@@ -72,10 +76,11 @@ class CallbackController(faststreamClient: FaststreamClient) extends FrontendCon
           Future.successful(BadRequest("The request failed"))
       }
     }.getOrElse {
-      Logger.warn(s"Callback received with invalid JSON or empty body received. Raw request: ${request.body}")
+      Logger.warn(s"Callback received with invalid JSON or empty body. Raw request: ${request.body}")
       Future.successful(BadRequest("Callback body was empty"))
     }
   }
+
   // scalastyle:on
 }
 

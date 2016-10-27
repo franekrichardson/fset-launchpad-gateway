@@ -8,5 +8,8 @@ case class ViewBrandedVideoCallback(candidate_id: String, custom_candidate_id: S
   extends BaseCallback(candidate_id, custom_candidate_id, interview_id, custom_interview_id, custom_invite_id, status, deadline)
 
 object ViewBrandedVideoCallback {
+
+  val expectedStatusKey = "view_branded_video"
+
   implicit val viewBrandedVideoCallbackFormat = Json.format[ViewBrandedVideoCallback]
 }
