@@ -54,6 +54,7 @@ trait ApplicationController extends BaseController {
           redirect_url = Some(ic.redirectUrl)
         )
       ).map { seamlessLoginInviteResponse =>
+          require(seamlessLoginInviteResponse.link.status == "success", "Invite link not generated successfully.")
           Ok(Json.toJson(InviteCandidateResponse.fromResponse(seamlessLoginInviteResponse)))
         }.recover(recoverFromBadCall)
     }
