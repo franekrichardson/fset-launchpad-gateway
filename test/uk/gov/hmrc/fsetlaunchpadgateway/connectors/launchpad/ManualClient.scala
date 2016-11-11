@@ -5,7 +5,7 @@ import org.scalatestplus.play._
 import play.api.Logger
 import play.api.test.FakeRequest
 import uk.gov.hmrc.fsetlaunchpadgateway.config.FrontendAppConfig
-import uk.gov.hmrc.fsetlaunchpadgateway.connectors.launchpad.exchangeobjects.account.{ CreateRequest, UpdateRequest }
+import uk.gov.hmrc.fsetlaunchpadgateway.connectors.launchpad.exchangeobjects.account.UpdateRequest
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Await
@@ -21,14 +21,15 @@ class ManualClient extends UnitSpec with OneServerPerTest {
 
       implicit val fakeRequest = FakeRequest()
 
-      val appClient = AccountClient
       val accountId = Some(FrontendAppConfig.launchpadApiConfig.accountId)
 
       Logger.warn("Sending request...")
 
-      val theRequest = AccountClient.updateAccount(accountId.get, UpdateRequest(
+      val theRequest = AccountClient.updateAccount(
+        accountId.get, UpdateRequest(
         Some(FrontendAppConfig.launchpadApiConfig.callbackUrl)
-      ))
+      )
+      )
 
       // TODO: This should be a mapped future
       val response = Await.result(theRequest, 30 seconds)
