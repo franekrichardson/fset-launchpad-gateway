@@ -16,8 +16,9 @@ class WhitelistFilterConfigSpec extends PlaySpec with OneAppPerTest {
   override def newAppForTest(td: TestData): Application = new GuiceApplicationBuilder()
     .configure(
       "whitelistExcludedCalls" -> Base64.getEncoder.encodeToString("/ping/ping,/healthcheck".getBytes),
-      "whitelist" -> Base64.getEncoder.encodeToString("11.22.33.44".getBytes)
-    ).global(ProductionFrontendGlobal).in(Mode.Test).build()
+      "whitelist" -> Base64.getEncoder.encodeToString("11.22.33.44".getBytes),
+      "metrics.enabled" -> false
+    ).global(TestFrontendGlobal).in(Mode.Test).build()
 
   "FrontendAppConfig" must {
     "return a valid config item" when {
